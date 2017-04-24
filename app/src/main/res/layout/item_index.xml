@@ -6,6 +6,7 @@
 
 
     <TextView
+        android:visibility="gone"
         android:id="@+id/tv_firstLetter"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

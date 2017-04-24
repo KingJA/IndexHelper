@@ -77,13 +77,18 @@ public class IndexView extends View {
                 int clickIndex = (int) (clickY / mCellHeight);
                 Log.e("onTouchEvent", "clickIndex: " + mIndexLetters[clickIndex]);
                 mLastIndex = clickIndex;
+                if (onIndexSelectedListener != null) {
+                    onIndexSelectedListener.onIndexSelected(clickIndex,mIndexLetters[clickIndex]);
+                }
                 break;
             case MotionEvent.ACTION_MOVE:
                 float moveY = event.getY();
                 int moveIndex = (int) (moveY / mCellHeight);
                 if (moveIndex != mLastIndex) {
                     mLastIndex = moveIndex;
-                    Log.e("onTouchEvent", "moveIndex: " + mIndexLetters[moveIndex]);
+                    if (onIndexSelectedListener != null) {
+                        onIndexSelectedListener.onIndexSelected(moveIndex,mIndexLetters[moveIndex]);
+                    }
                 }
 
                 break;
@@ -96,7 +101,7 @@ public class IndexView extends View {
     }
 
     public interface OnIndexSelectedListener {
-        void onIndexSelected(int index);
+        void onIndexSelected(int index,String letter);
     }
 
     public void setOnIndexSelectedListener(OnIndexSelectedListener onIndexSelectedListener) {

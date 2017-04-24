@@ -3,7 +3,9 @@ package sample.kingja.indexhelper;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.ListView;
+import android.widget.TextView;
 
+import com.kingja.indexhelper.IndexView;
 import com.kingja.indexhelper.PinyinTool;
 
 import java.util.ArrayList;
@@ -18,15 +20,31 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        ListView lv_index = (ListView) findViewById(R.id.lv_index);
-        PinyinTool pinyinTool = new PinyinTool();
+        fillData();
+        final ListView lv_index = (ListView) findViewById(R.id.lv_index);
+        IndexView indexView = (IndexView) findViewById(R.id.indexView);
+        final TextView tv_index = (TextView) findViewById(R.id.tv_index);
+        final CityIndexAdapter cityIndexAdapter = new CityIndexAdapter(this, citys);
+        lv_index.setAdapter(cityIndexAdapter);
+        indexView.setOnIndexSelectedListener(new IndexView.OnIndexSelectedListener() {
+            @Override
+            public void onIndexSelected(int index, String letter) {
+                int position = cityIndexAdapter.getPositionForSection(letter.charAt(0));
+                if(position != -1){
+                    lv_index.setSelection(position);
+                }
+                tv_index.setText(letter);
+            }
+        });
 
+    }
+
+    private void fillData() {
+        PinyinTool pinyinTool = new PinyinTool();
         for (int i = 0; i < Constants.citys.length; i++) {
             citys.add(new City(Constants.citys[i], pinyinTool.toPinYin(Constants.citys[i])));
         }
         Collections.sort(citys, new CityComparator());
-        CityIndexAdapter cityIndexAdapter = new CityIndexAdapter(this, citys);
-        lv_index.setAdapter(cityIndexAdapter);
     }
 
     private class CityComparator implements Comparator<City> {

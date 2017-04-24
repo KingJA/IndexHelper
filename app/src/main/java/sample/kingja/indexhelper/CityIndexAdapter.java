@@ -5,9 +5,12 @@ import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.SectionIndexer;
 import android.widget.TextView;
 
 import java.util.List;
+
+import static android.R.id.list;
 
 /**
  * Description:TODO
@@ -15,11 +18,10 @@ import java.util.List;
  * Author:KingJA
  * Email:kingjavip@gmail.com
  */
-public class CityIndexAdapter extends BaseAdapter {
+public class CityIndexAdapter extends BaseAdapter implements SectionIndexer {
     private Context context;
     private List<City> cities;
 
-    private String lastLetter="";
 
     public CityIndexAdapter(Context context, List<City> cities) {
         this.context = context;
@@ -58,14 +60,37 @@ public class CityIndexAdapter extends BaseAdapter {
         }
         viewHolder.tv_cityName.setText(cities.get(position).getName());
 
-        if (lastLetter.equals(cities.get(position).getPinyin())) {
-            viewHolder.tv_firstLetter.setVisibility(View.GONE);
-        } else {
+        int section = getSectionForPosition(position);
+        if (position == getPositionForSection(section)) {
             viewHolder.tv_firstLetter.setVisibility(View.VISIBLE);
             viewHolder.tv_firstLetter.setText(cities.get(position).getPinyin());
-            lastLetter = cities.get(position).getPinyin();
+
+        } else {
+            viewHolder.tv_firstLetter.setVisibility(View.GONE);
         }
         return convertView;
+    }
+
+    @Override
+    public Object[] getSections() {
+        return new Object[0];
+    }
+
+    @Override
+    public int getPositionForSection(int sectionIndex) {
+        for (int i = 0; i < getCount(); i++) {
+            String sortStr = cities.get(i).getPinyin();
+            char firstChar = sortStr.toUpperCase().charAt(0);
+            if (firstChar == sectionIndex) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    @Override
+    public int getSectionForPosition(int position) {
+        return cities.get(position).getPinyin().charAt(0);
     }
 
     class ViewHolder {
