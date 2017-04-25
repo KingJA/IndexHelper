@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">IndexHelper</string>
+    <color name="blue">#0092ed</color>
+    <color name="gray">#b9b9b9</color>
 </resources>

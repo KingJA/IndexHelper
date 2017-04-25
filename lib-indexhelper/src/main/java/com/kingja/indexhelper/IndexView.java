@@ -27,6 +27,9 @@ public class IndexView extends View {
     private float mCellHeight;
     private float mTextHeightOffset;
     private OnIndexSelectedListener onIndexSelectedListener;
+    private int touchIndex=-1;
+    private int mIndexNormalColor=0XFF0096CC;
+    private int mIndexSelectedColor=0XFFB9B9B9;
 
     public IndexView(Context context) {
         this(context, null);
@@ -63,6 +66,7 @@ public class IndexView extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         for (int i = 0; i < mIndexLetters.length; i++) {
+            mLetterPaint.setColor(touchIndex==i?mIndexSelectedColor:mIndexNormalColor);
             canvas.drawText(mIndexLetters[i], mLetterX, mCellHeight * i + mTextHeightOffset, mLetterPaint);
         }
     }
@@ -74,21 +78,14 @@ public class IndexView extends View {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 float clickY = event.getY();
-                int clickIndex = (int) (clickY / mCellHeight);
-                Log.e("onTouchEvent", "clickIndex: " + mIndexLetters[clickIndex]);
-                mLastIndex = clickIndex;
-                if (onIndexSelectedListener != null) {
-                    onIndexSelectedListener.onIndexSelected(clickIndex,mIndexLetters[clickIndex]);
-                }
+                touchIndex = (int) (clickY / mCellHeight);
+                callback();
                 break;
             case MotionEvent.ACTION_MOVE:
                 float moveY = event.getY();
-                int moveIndex = (int) (moveY / mCellHeight);
-                if (moveIndex != mLastIndex) {
-                    mLastIndex = moveIndex;
-                    if (onIndexSelectedListener != null) {
-                        onIndexSelectedListener.onIndexSelected(moveIndex,mIndexLetters[moveIndex]);
-                    }
+                 touchIndex = (int) (moveY / mCellHeight);
+                if (touchIndex != mLastIndex) {
+                    callback();
                 }
 
                 break;
@@ -97,7 +94,16 @@ public class IndexView extends View {
                 break;
 
         }
+
         return true;
+    }
+
+    private void callback() {
+        mLastIndex = touchIndex;
+        if (onIndexSelectedListener != null) {
+            onIndexSelectedListener.onIndexSelected(touchIndex,mIndexLetters[touchIndex]);
+            invalidate();
+        }
     }
 
     public interface OnIndexSelectedListener {

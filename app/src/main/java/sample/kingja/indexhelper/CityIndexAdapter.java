@@ -1,7 +1,6 @@
 package sample.kingja.indexhelper;
 
 import android.content.Context;
-import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -9,8 +8,6 @@ import android.widget.SectionIndexer;
 import android.widget.TextView;
 
 import java.util.List;
-
-import static android.R.id.list;
 
 /**
  * Description:TODO
