@@ -3,16 +3,17 @@ package sample.kingja.indexhelper;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.kingja.indexhelper.FirstLetter;
+
 /**
  * Description:TODO
  * Create Time:2017/4/24 10:24
  * Author:KingJA
  * Email:kingjavip@gmail.com
  */
-public class City implements Comparable<City> {
+public class City implements FirstLetter{
     private String name;
     private String pinyin;
-    private String firstLetter;
 
     public City(String name, String pinyin) {
         this.name = name;
@@ -36,22 +37,10 @@ public class City implements Comparable<City> {
         this.pinyin = pinyin;
     }
 
-    @Override
-    public int compareTo(@NonNull City city) {
-        if (this.pinyin.compareTo(city.getPinyin()) > 0) {
-            return 1;
-        }
-        if (this.pinyin.compareTo(city.getPinyin()) < 0) {
-            return -1;
-        }
-        return 0;
-    }
+
 
     public String getFirstLetter() {
-        return firstLetter;
+        return pinyin;
     }
 
-    public void setFirstLetter(String firstLetter) {
-        this.firstLetter = firstLetter;
-    }
 }

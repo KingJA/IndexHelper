@@ -1,11 +1,13 @@
 package com.kingja.indexhelper;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
-import android.util.Log;
+import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -23,13 +25,19 @@ public class IndexView extends View {
             "U", "V", "W", "X", "Y", "Z"};
     private Paint mLetterPaint;
     private float mLetterX;
-    private float mLetterY;
     private float mCellHeight;
     private float mTextHeightOffset;
     private OnIndexSelectedListener onIndexSelectedListener;
-    private int touchIndex=-1;
-    private int mIndexNormalColor=0XFF0096CC;
-    private int mIndexSelectedColor=0XFFB9B9B9;
+    private static final int DEFALUT_INDEX_NORMAL_COLOR = 0XFF0096CC;
+    private static final int DEFALUT_INDEX_SELECTED_COLOR = 0XFFB9B9B9;
+    private static final int DEFALUT_INDEX_TEXT_SIZE = 15;
+    private static final int DEFALUT_INDEX_WIDTH = 24;
+    private int mIndexNormalColor;
+    private int mIndexSelectedColor;
+    private float mIndexTextSize;
+    private int touchIndex = -1;
+    private int mLastIndex = -1;
+    private Handler mHandler;
 
     public IndexView(Context context) {
         this(context, null);
@@ -41,14 +49,41 @@ public class IndexView extends View {
 
     public IndexView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.IndexView);
+        mIndexNormalColor = typedArray.getColor(R.styleable.IndexView_indexColorNor, DEFALUT_INDEX_NORMAL_COLOR);
+        mIndexSelectedColor = typedArray.getColor(R.styleable.IndexView_indexColorSel, DEFALUT_INDEX_SELECTED_COLOR);
+        mIndexTextSize = dp2px(typedArray.getDimension(R.styleable.IndexView_indexTextSize, DEFALUT_INDEX_TEXT_SIZE));
         initIndexView();
     }
 
     private void initIndexView() {
         mLetterPaint = new Paint();
-
+        mHandler = new Handler();
     }
 
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        setMeasuredDimension(getExpectSize(dp2px(DEFALUT_INDEX_WIDTH), widthMeasureSpec), getMeasuredHeight());
+    }
+
+    private int getExpectSize(int size, int measureSpec) {
+        int result = size;
+        int specMode = MeasureSpec.getMode(measureSpec);
+        int specSize = MeasureSpec.getSize(measureSpec);
+        switch (specMode) {
+            case MeasureSpec.EXACTLY:
+                result = specSize;
+                break;
+            case MeasureSpec.UNSPECIFIED:
+                result = size;
+                break;
+            case MeasureSpec.AT_MOST:
+                result = Math.min(size, specSize);
+                break;
+        }
+        return result;
+    }
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
@@ -66,12 +101,11 @@ public class IndexView extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         for (int i = 0; i < mIndexLetters.length; i++) {
-            mLetterPaint.setColor(touchIndex==i?mIndexSelectedColor:mIndexNormalColor);
+            mLetterPaint.setColor(touchIndex == i ? mIndexSelectedColor : mIndexNormalColor);
             canvas.drawText(mIndexLetters[i], mLetterX, mCellHeight * i + mTextHeightOffset, mLetterPaint);
         }
     }
 
-    private int mLastIndex = -1;
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -83,7 +117,7 @@ public class IndexView extends View {
                 break;
             case MotionEvent.ACTION_MOVE:
                 float moveY = event.getY();
-                 touchIndex = (int) (moveY / mCellHeight);
+                touchIndex = (int) (moveY / mCellHeight);
                 if (touchIndex != mLastIndex) {
                     callback();
                 }
@@ -94,23 +128,34 @@ public class IndexView extends View {
                 break;
 
         }
-
         return true;
     }
 
     private void callback() {
         mLastIndex = touchIndex;
         if (onIndexSelectedListener != null) {
-            onIndexSelectedListener.onIndexSelected(touchIndex,mIndexLetters[touchIndex]);
+            mHandler.removeCallbacksAndMessages(null);
+            onIndexSelectedListener.onIndexSelected(touchIndex, mIndexLetters[touchIndex]);
             invalidate();
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    onIndexSelectedListener.onIndexSelectedCompleted(touchIndex, mIndexLetters[touchIndex]);
+                }
+            },1000);
         }
     }
 
     public interface OnIndexSelectedListener {
-        void onIndexSelected(int index,String letter);
+        void onIndexSelected(int index, String letter);
+        void onIndexSelectedCompleted(int index, String letter);
     }
 
     public void setOnIndexSelectedListener(OnIndexSelectedListener onIndexSelectedListener) {
         this.onIndexSelectedListener = onIndexSelectedListener;
+    }
+
+    protected int dp2px(float dp) {
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, getResources().getDisplayMetrics());
     }
 }

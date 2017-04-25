@@ -15,12 +15,13 @@
 
     <com.kingja.indexhelper.IndexView
         android:id="@+id/indexView"
-        android:layout_width="24dp"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_alignParentRight="true"
         android:background="#77eeeeee"/>
 
     <TextView
+        android:visibility="gone"
         android:id="@+id/tv_index"
         android:layout_width="80dp"
         android:layout_height="80dp"
