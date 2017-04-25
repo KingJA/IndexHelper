@@ -40,11 +40,10 @@ public class MainActivity extends AppCompatActivity {
                 }
                 tv_index.setVisibility(View.VISIBLE);
                 tv_index.setText(letter);
-
             }
 
             @Override
-            public void onIndexSelectedCompleted(int index, String letter) {
+            public void onIndexSelectedCompleted() {
                 tv_index.setVisibility(View.GONE);
             }
         });
@@ -62,8 +61,8 @@ public class MainActivity extends AppCompatActivity {
     private class CityComparator implements Comparator<FirstLetter> {
         @Override
         public int compare(FirstLetter lhs, FirstLetter rhs) {
-            String a = lhs.getFirstLetter().substring(0, 1);
-            String b = rhs.getFirstLetter().substring(0, 1);
+            String a = lhs.getFirstLetter();
+            String b = rhs.getFirstLetter();
             return a.compareTo(b);
         }
     }

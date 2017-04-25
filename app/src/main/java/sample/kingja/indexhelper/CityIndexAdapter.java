@@ -42,7 +42,7 @@ public class CityIndexAdapter extends BaseAdapter implements SectionIndexer {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        ViewHolder viewHolder = null;
+        ViewHolder viewHolder ;
 
         if (convertView == null) {
             viewHolder = new ViewHolder();
@@ -60,7 +60,7 @@ public class CityIndexAdapter extends BaseAdapter implements SectionIndexer {
         int section = getSectionForPosition(position);
         if (position == getPositionForSection(section)) {
             viewHolder.tv_firstLetter.setVisibility(View.VISIBLE);
-            viewHolder.tv_firstLetter.setText(cities.get(position).getPinyin());
+            viewHolder.tv_firstLetter.setText(cities.get(position).getFirstLetter());
 
         } else {
             viewHolder.tv_firstLetter.setVisibility(View.GONE);

@@ -7,5 +7,5 @@ package com.kingja.indexhelper;
  * Email:kingjavip@gmail.com
  */
 public interface FirstLetter {
-    public String getFirstLetter();
+    String getFirstLetter();
 }

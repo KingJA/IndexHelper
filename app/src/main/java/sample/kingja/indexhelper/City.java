@@ -40,7 +40,7 @@ public class City implements FirstLetter{
 
 
     public String getFirstLetter() {
-        return pinyin;
+        return pinyin.substring(0, 1);
     }
 
 }

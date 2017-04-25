@@ -18,26 +18,27 @@ import android.view.View;
  * Email:kingjavip@gmail.com
  */
 public class IndexView extends View {
+    private static final int DEFALUT_INDEX_NORMAL_COLOR = 0XFF0096CC;
+    private static final int DEFALUT_INDEX_SELECTED_COLOR = 0XFFB9B9B9;
+    private static final int DEFALUT_INDEX_TEXT_SIZE = 12;
+    private static final int DEFALUT_INDEX_WIDTH = 24;
     private final String[] mIndexLetters = {"A", "B", "C", "D", "E",
             "F", "G", "H", "I", "J",
             "K", "L", "M", "N", "O",
             "P", "Q", "R", "S", "T",
             "U", "V", "W", "X", "Y", "Z"};
     private Paint mLetterPaint;
+    private Handler mHandler;
+    private OnIndexSelectedListener onIndexSelectedListener;
     private float mLetterX;
     private float mCellHeight;
     private float mTextHeightOffset;
-    private OnIndexSelectedListener onIndexSelectedListener;
-    private static final int DEFALUT_INDEX_NORMAL_COLOR = 0XFF0096CC;
-    private static final int DEFALUT_INDEX_SELECTED_COLOR = 0XFFB9B9B9;
-    private static final int DEFALUT_INDEX_TEXT_SIZE = 15;
-    private static final int DEFALUT_INDEX_WIDTH = 24;
     private int mIndexNormalColor;
     private int mIndexSelectedColor;
     private float mIndexTextSize;
-    private int touchIndex = -1;
+    private int mTouchIndex = -1;
     private int mLastIndex = -1;
-    private Handler mHandler;
+
 
     public IndexView(Context context) {
         this(context, null);
@@ -58,6 +59,8 @@ public class IndexView extends View {
 
     private void initIndexView() {
         mLetterPaint = new Paint();
+        mLetterPaint.setTextSize(mIndexTextSize);
+        mLetterPaint.setTextAlign(Paint.Align.CENTER);
         mHandler = new Handler();
     }
 
@@ -90,18 +93,17 @@ public class IndexView extends View {
         super.onSizeChanged(w, h, oldw, oldh);
         int measuredWidth = getMeasuredWidth();
         int measuredHeight = getMeasuredHeight();
-        float letterWidth = mLetterPaint.measureText("A");
         mCellHeight = measuredHeight * 1.0f / (mIndexLetters.length * 1.0f);
         mTextHeightOffset = -(mLetterPaint.ascent() + mLetterPaint.descent()) * 0.5f +
                 mCellHeight * 0.5f;
-        mLetterX = measuredWidth * 0.5f - letterWidth * 0.5f;
+        mLetterX = measuredWidth * 0.5f ;
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         for (int i = 0; i < mIndexLetters.length; i++) {
-            mLetterPaint.setColor(touchIndex == i ? mIndexSelectedColor : mIndexNormalColor);
+            mLetterPaint.setColor(mTouchIndex == i ? mIndexSelectedColor : mIndexNormalColor);
             canvas.drawText(mIndexLetters[i], mLetterX, mCellHeight * i + mTextHeightOffset, mLetterPaint);
         }
     }
@@ -112,19 +114,21 @@ public class IndexView extends View {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 float clickY = event.getY();
-                touchIndex = (int) (clickY / mCellHeight);
+                mTouchIndex = (int) (clickY / mCellHeight);
                 callback();
                 break;
             case MotionEvent.ACTION_MOVE:
                 float moveY = event.getY();
-                touchIndex = (int) (moveY / mCellHeight);
-                if (touchIndex != mLastIndex) {
+                mTouchIndex = (int) (moveY / mCellHeight);
+                if (mTouchIndex != mLastIndex) {
                     callback();
                 }
 
                 break;
             case MotionEvent.ACTION_UP:
                 mLastIndex = -1;
+                mTouchIndex = -1;
+                invalidate();
                 break;
 
         }
@@ -132,23 +136,24 @@ public class IndexView extends View {
     }
 
     private void callback() {
-        mLastIndex = touchIndex;
+        mLastIndex = mTouchIndex;
         if (onIndexSelectedListener != null) {
             mHandler.removeCallbacksAndMessages(null);
-            onIndexSelectedListener.onIndexSelected(touchIndex, mIndexLetters[touchIndex]);
+            onIndexSelectedListener.onIndexSelected(mTouchIndex, mIndexLetters[mTouchIndex]);
             invalidate();
             mHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    onIndexSelectedListener.onIndexSelectedCompleted(touchIndex, mIndexLetters[touchIndex]);
+                    onIndexSelectedListener.onIndexSelectedCompleted();
                 }
-            },1000);
+            }, 1000);
         }
     }
 
     public interface OnIndexSelectedListener {
         void onIndexSelected(int index, String letter);
-        void onIndexSelectedCompleted(int index, String letter);
+
+        void onIndexSelectedCompleted();
     }
 
     public void setOnIndexSelectedListener(OnIndexSelectedListener onIndexSelectedListener) {
